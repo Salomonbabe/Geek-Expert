@@ -640,6 +640,7 @@
       align-items: center;
       justify-content: center;
       backdrop-filter: blur(4px);
+      padding: 16px;
     }
     .modal-overlay.open { display: flex; }
     .modal {
@@ -647,9 +648,14 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       padding: 24px;
-      width: min(90vw, 460px);
+      width: min(92vw, 480px);
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
       box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 1px var(--border);
       animation: modalIn .2s ease;
+      flex-shrink: 0;
     }
     @keyframes modalIn {
       from { opacity: 0; transform: scale(.95) translateY(-10px); }
@@ -882,8 +888,9 @@
       #topbar { padding: 0 10px; gap: 8px; }
       #chat-title { font-size: 10px; }
 
-      /* Modal full width */
-      .modal { width: 95vw; padding: 18px; }
+      /* Modal full width mobile */
+      .modal { width: 96vw; padding: 16px; max-height: calc(100dvh - 32px); }
+      .modal-overlay { padding: 8px; align-items: flex-start; padding-top: 16px; }
 
       /* Memory panel full width */
       #memory-panel { width: 100vw; }
@@ -1801,9 +1808,14 @@ const App = (() => {
     document.getElementById('lang-select').value = state.lang;
     const manualEl = document.getElementById('manual-redirect-uri');
     if (manualEl) manualEl.value = state.manualRedirectUri || '';
+    // URI auto : toujours origin + /
     const autoUri = window.location.origin + '/';
     const el = document.getElementById('redirect-uri-display');
     if (el) el.textContent = autoUri;
+    // Pré-remplir le champ manuel si vide avec l'URI propre
+    if (manualEl && !manualEl.value) {
+      manualEl.placeholder = autoUri;
+    }
     document.getElementById('settings-modal').classList.add('open');
   }
 
