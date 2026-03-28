@@ -7,7 +7,21 @@
   <meta name="description" content="Ton assistant IA expert en informatique : PC, Mac, Linux, iPhone, Android, formation, contenu social media." />
   <meta name="theme-color" content="#00d4ff" />
   <link rel="manifest" href="manifest.json" />
+
+  <!-- PWA iOS (Apple) -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Geek Expert" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png" />
+  <link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.png" />
+  <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png" />
+
+  <!-- PWA Android / Chrome -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Geek Expert" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
 
   <!-- Google Fonts: Orbitron + Space Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1113,10 +1127,24 @@
       <div class="modal-section">
         <div class="modal-label">Google OAuth Client ID</div>
         <input type="text" class="modal-input" id="google-client-id" placeholder="xxxxx.apps.googleusercontent.com" />
-        <div style="margin-top:6px;padding:8px 10px;background:var(--dark-3);border-radius:8px;border:1px solid var(--border)">
-          <div style="font-size:10px;color:var(--text-dim);font-family:var(--font-mono);margin-bottom:4px">URI DE REDIRECTION À COPIER DANS GOOGLE CONSOLE :</div>
-          <div id="redirect-uri-display" style="font-size:11px;color:var(--cyan);font-family:var(--font-mono);word-break:break-all"></div>
-          <button onclick="App.copyRedirectUri()" style="margin-top:6px;padding:4px 10px;background:var(--dark-2);border:1px solid var(--border);border-radius:6px;font-size:10px;color:var(--text-dim);cursor:pointer">📋 Copier</button>
+        
+        <div style="margin-top:8px;padding:10px 12px;background:var(--dark-3);border-radius:8px;border:1px solid var(--border)">
+          <div style="font-size:10px;color:var(--text-dim);font-family:var(--font-mono);margin-bottom:6px;letter-spacing:1px">
+            ① URI DÉTECTÉE PAR L'APP (copie-la dans Google Console) :
+          </div>
+          <div id="redirect-uri-display" style="font-size:11px;color:var(--cyan);font-family:var(--font-mono);word-break:break-all;padding:6px;background:var(--dark-bg);border-radius:4px;min-height:20px"></div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+            <button onclick="App.copyRedirectUri()" style="padding:5px 12px;background:var(--dark-2);border:1px solid var(--border);border-radius:6px;font-size:10px;color:var(--cyan);cursor:pointer;font-family:var(--font-mono)">📋 Copier l'URI</button>
+            <button onclick="App.testDriveUrl()" style="padding:5px 12px;background:var(--dark-2);border:1px solid var(--border);border-radius:6px;font-size:10px;color:var(--neon);cursor:pointer;font-family:var(--font-mono)">🔍 Voir l'URL OAuth</button>
+          </div>
+        </div>
+
+        <div style="margin-top:6px;padding:8px 12px;background:rgba(255,183,0,0.07);border-radius:8px;border:1px solid rgba(255,183,0,0.25)">
+          <div style="font-size:10px;color:var(--text-dim);font-family:var(--font-mono);margin-bottom:4px;letter-spacing:1px">
+            ② OU ENTRER L'URI MANUELLEMENT (si Google Console a une URL différente) :
+          </div>
+          <input type="text" class="modal-input" id="manual-redirect-uri" placeholder="https://geek-expert.vercel.app/" style="font-size:12px;margin-top:4px" />
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px">Laisse vide pour utiliser l'URI détectée automatiquement</div>
         </div>
       </div>
       <div class="modal-section">
@@ -1771,33 +1799,45 @@ const App = (() => {
     document.getElementById('model-select').value = state.model;
     document.getElementById('google-client-id').value = state.googleClientId;
     document.getElementById('lang-select').value = state.lang;
-    // URI fixe = origin + /
-    const redirectUri = window.location.origin + '/';
+    const manualEl = document.getElementById('manual-redirect-uri');
+    if (manualEl) manualEl.value = state.manualRedirectUri || '';
+    const autoUri = window.location.origin + '/';
     const el = document.getElementById('redirect-uri-display');
-    if (el) el.textContent = redirectUri;
+    if (el) el.textContent = autoUri;
     document.getElementById('settings-modal').classList.add('open');
   }
 
   function copyRedirectUri() {
-    const el = document.getElementById('redirect-uri-display');
-    if (el) {
-      navigator.clipboard.writeText(el.textContent);
-      showToast('📋 URI copiée ! Colle-la dans Google Console → URI de redirection', 'success');
-    }
+    const uri = window.location.origin + '/';
+    navigator.clipboard.writeText(uri);
+    showToast('📋 URI copiée ! Colle-la dans Google Console', 'success');
   }
+
+  function testDriveUrl() {
+    const clientId = document.getElementById('google-client-id').value.trim() || state.googleClientId;
+    const manualUri = document.getElementById('manual-redirect-uri')?.value.trim();
+    const redirectUri = manualUri || (window.location.origin + '/');
+    if (!clientId) { showToast('⚠️ Entre d\'abord ton Client ID', 'error'); return; }
+    alert('redirect_uri qui sera envoyée à Google :\n\n' + redirectUri + '\n\nCopie exactement cette valeur dans\nGoogle Console → URI de redirection autorisés');
+  }
+
   function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+
   function saveSettings() {
     state.apiKey = document.getElementById('api-key-input').value.trim();
     state.proxyUrl = document.getElementById('proxy-url-input').value.trim();
     state.model = document.getElementById('model-select').value;
     state.googleClientId = document.getElementById('google-client-id').value.trim();
     state.lang = document.getElementById('lang-select').value;
+    const manualEl = document.getElementById('manual-redirect-uri');
+    state.manualRedirectUri = manualEl ? manualEl.value.trim() : '';
     save();
     closeSettings();
     renderUI();
     showToast(state.lang === 'fr' ? '✅ Paramètres sauvegardés' : '✅ Settings saved', 'success');
     setStatus('ok', state.lang === 'fr' ? 'Système opérationnel' : 'System operational');
   }
+
 
   // ---- MEMORY ----
   function openMemory() {
@@ -1847,16 +1887,22 @@ const App = (() => {
   }
 
   // ---- GOOGLE DRIVE ----
+  function getRedirectUri() {
+    // Priorité : URI saisie manuellement dans les paramètres
+    if (state.manualRedirectUri && state.manualRedirectUri.trim()) {
+      return state.manualRedirectUri.trim();
+    }
+    // Sinon : origine exacte du site + /
+    return window.location.origin + '/';
+  }
+
   function driveSync() {
     if (!state.googleClientId) {
       showToast('⚠️ Ajoute ton Client ID Google dans les paramètres', 'error');
       openSettings();
       return;
     }
-
-    // URI fixe = origine exacte du site (sans chemin variable)
-    const redirectUri = window.location.origin + '/';
-
+    const redirectUri = getRedirectUri();
     const params = new URLSearchParams({
       client_id: state.googleClientId,
       redirect_uri: redirectUri,
@@ -1865,11 +1911,31 @@ const App = (() => {
       include_granted_scopes: 'true',
       prompt: 'consent',
     });
-
     state._lastRedirectUri = redirectUri;
     save();
     window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
   }
+
+  function testDriveUrl() {
+    const clientId = document.getElementById('google-client-id').value.trim() || state.googleClientId;
+    const manualUri = document.getElementById('manual-redirect-uri')?.value.trim();
+    const redirectUri = manualUri || window.location.origin + '/';
+    if (!clientId) { showToast('⚠️ Entre d\'abord ton Client ID', 'error'); return; }
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: 'token',
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      include_granted_scopes: 'true',
+      prompt: 'consent',
+    });
+    const fullUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+    // Afficher l'URL complète pour debug
+    const msg = `redirect_uri envoyée :\n${redirectUri}\n\nCopie exactement cette valeur dans Google Console → URI de redirection autorisés`;
+    alert(msg);
+  }
+
+
 
   function driveSaveConv(conv) {
     // Placeholder for actual Drive API call
@@ -2000,7 +2066,7 @@ const App = (() => {
     init, newConv, switchConv, deleteConv,
     send, sendSuggest, onKey, autoResize, handleFiles, removeAttach,
     toggleSidebar, clearMessages, refreshApp,
-    openSettings, closeSettings, saveSettings, copyRedirectUri,
+    openSettings, closeSettings, saveSettings, copyRedirectUri, testDriveUrl,
     openMemory, closeMemory, saveMemory,
     openExport, closeExport, exportHistory, importHistory,
     driveSync, setLang, showToast,
