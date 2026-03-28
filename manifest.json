@@ -1,0 +1,74 @@
+{
+  "name": "Geek Expert – Assistant IA",
+  "short_name": "Geek Expert",
+  "description": "Ton assistant IA expert en informatique : PC, Mac, Linux, iPhone, Android, formations, social media.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050a10",
+  "theme_color": "#00d4ff",
+  "orientation": "any",
+  "lang": "fr",
+  "categories": ["productivity", "utilities", "education"],
+  "screenshots": [],
+  "icons": [
+    {
+      "src": "icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nouvelle conversation",
+      "short_name": "Nouveau chat",
+      "description": "Démarrer une nouvelle conversation",
+      "url": "/?new=1",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
